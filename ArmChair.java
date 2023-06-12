@@ -2,9 +2,9 @@ package n3e1ejercicioCinema;
 
 public class ArmChair {
 	
-	protected int numberRow;
-	protected int numberSeat;
-	protected String nameCustomer;
+	private int numberRow;
+	private int numberSeat;
+	private String nameCustomer;
 	
 	//constructor for an individual seat
 	public ArmChair(int row, int seat, String name) {
