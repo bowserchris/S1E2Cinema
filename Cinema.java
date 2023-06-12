@@ -9,9 +9,9 @@ public class Cinema {
 		System.out.println("The cinema Ci-Ver-Narium Cinema\u2122 has been created.");
 	}
 	
-	protected ArmChairManagement armChairManagement;
-	protected int totalRow;
-	protected int totalSeat;
+	private ArmChairManagement armChairManagement;
+	private int totalRow;
+	private int totalSeat;
 	
 	public Cinema() {
 		this.armChairManagement = new ArmChairManagement();
@@ -47,13 +47,13 @@ public class Cinema {
 	
 	////otros metodos abajo/////
 	
-	public static int inputInt(String message) {// throws IncorrectRowException, IncorrectSeatException{
+	private static int inputInt(String message) {// throws IncorrectRowException, IncorrectSeatException{
 		Scanner input = new Scanner(System.in);
 		System.out.println(message);
 		return input.nextInt();
 	}
 	
-	public static String inputString(String message) {//throws IncorrectPersonNameException{
+	private static String inputString(String message) {//throws IncorrectPersonNameException{
 		Scanner input = new Scanner(System.in);
 		System.out.println(message);
 		return input.nextLine();
@@ -73,9 +73,13 @@ public class Cinema {
 					showPersonSeat(inputString("What´s the name of the customer you wish to see the reservations for?"));
 					break;
 				case 3:		//Reserve a seat for a customer.\r" "Unhandled exception type..." but everything is throwing correctly?
-					reserveArmChair(inputInt("What row number would you like to reserve?"), 
-									inputInt("What seat number would they like to reserve?"), 
-									inputString("What´s the name of the customer for the reservation?"));
+					try {
+						reserveArmChair(inputInt("What row number would you like to reserve?"), 
+								inputInt("What seat number would they like to reserve?"), 
+								inputString("What´s the name of the customer for the reservation?"));
+					} catch (OccupiedSeatException ose) {
+						System.out.println("OccupiedSeatException in reserve");
+					}
 					break;
 				case 4:		//Cancel a seat reservation.\r" "Unhandled exception type..." but everything is throwing correctly?
 					cancelSeatReservation(inputInt("What row is the seat in that you wish to cancel?"), inputInt("What is the seat number you wish to cancel?"));
@@ -95,9 +99,9 @@ public class Cinema {
 	}
 	
 	//metodo switch que devuelve que elijio el usuario en el menu inicial
-	public static int menu() {
+	private static int menu() {
 		int initialMenu = inputInt("What would you like to do within Ci-Ver-Narium Cinema\u2122? "
-				+ "Please introduce the number to the appropiate action.\r"
+				+ "\rPlease introduce the number to the appropiate action.\r"
 				+ "1) Show all reserved seats within the cinema.\r"
 				+ "2) Show all seats reserved from 1 person.\r"
 				+ "3) Reserve a seat for a customer.\r"
@@ -109,74 +113,83 @@ public class Cinema {
 	
 	///metodo que pide datos para introducir el total de filas y asientos dentro de ello. 
 	///se inicializa en el constructor del objeto Cinema y instancia cuando se crea el Cinema
-	public void requestInitialData() {
+	private void requestInitialData() {
 		this.totalRow = inputInt("How many rows does the cinema have capacity for?");
 		this.totalSeat = inputInt("How many seats does each row have capacity for?");
 	}
 	
 	///metodo que recibe un asiento de fila como parametro (requests dice el ejercicio) y comprueba que quepa desde el 1 al total, sino da error
-	public int enterRow(int row) throws IncorrectRowException { // 
+	private int enterRow(int row) throws IncorrectRowException { // 
 		int newRow = row;
 		boolean exit = false;
 		do {	
-			try {
-				if (newRow >= 1 && newRow <= totalRow) {
-					//System.out.println("The row has been entered.");
-					exit = true;
+			
+			if ((newRow >= 1 && newRow <= totalRow)) {
+				//System.out.println("The row has been entered.");
+				exit = true;
+				//throw new IncorrectRowException("IncorrectRowException");
+			} else {
+				newRow = inputInt("The chosen row is outside of the range within the cinema. The total rows are: " + totalRow + ". Input another: ");
+			}
+			/*try {
+				
 				} else {
 					throw new IncorrectRowException("IncorrectRowException");
 				}
 			} catch (IncorrectRowException ire){
 				System.out.println(ire.getMessage());
 				newRow = inputInt("The chosen row is outside of the range within the cinema. The total rows are: " + totalRow + ". Input another: ");
-			}
+			}*/
 		} while(!exit); 
 		return newRow;
 	}
 	
 	///metodo que recibe un asiento dentro de una fila como parametro (requests dice el ejercicio) y comprueba que quepa desde el 1 al total, sino da error
-	public int enterSeat(int seat) throws IncorrectSeatException { //
+	private int enterSeat(int seat) throws IncorrectSeatException { //
 		int newSeat = seat;
 		boolean exit = false;
 		do {
-			try {
-				if (newSeat >= 1 && newSeat <= totalSeat) {
-					//System.out.println("The seat has been entered.");
-					exit = true;
-				} else {
+			if (newSeat >= 1 && newSeat <= totalSeat) {
+				//System.out.println("The seat has been entered.");
+				exit = true;
+			} else {
+				newSeat = inputInt("The chosen seat is outside of the range within the cinema. The total seats are: " + totalSeat + ". Input another: ");
+			}
+			/*try {
+				
 					throw new IncorrectSeatException("IncorrectSeatException");
 				}
 			} catch (IncorrectSeatException ise) {
 				System.out.println(ise.getMessage());
-				newSeat = inputInt("The chosen seat is outside of the range within the cinema. The total seats are: " + totalSeat + ". Input another: ");
-				
-			} 
+				*/
 		} while(!exit);
 		return newSeat;	
 	}
 	
 	///metodo que recibe un nombre y lo compara si tiene numeros, si salta excepcion 
 	
-	public String enterPerson(String name) throws IncorrectPersonNameException { //
+	private String enterPerson(String name)  throws IncorrectPersonNameException{ //
 		String nameClient = name;
 		boolean exit = false;
 		do {
-			try {	//abajo importar clase regex.pattern para comparar string con numeros, respuesta de shalamus en https://stackoverflow.com/questions/5238491/check-if-string-contains-only-letters
-				if (Pattern.matches("[a-zA-Z]+", nameClient)) {
-					exit = true;
-				} else {
+			if (Pattern.matches("[a-zA-Z]+", nameClient)) {
+				exit = true;
+			} else {
+				nameClient = inputString("Retry name input: ");
+			}
+			/*try {	//abajo importar clase regex.pattern para comparar string con numeros, respuesta de shalamus en https://stackoverflow.com/questions/5238491/check-if-string-contains-only-letters
+				
 					throw new IncorrectPersonNameException("IncorrectPersonNameException");
 				}
 			} catch (IncorrectPersonNameException ipne) {
 				System.out.println(ipne.getMessage());
-				nameClient = inputString("Retry name input: ");
-			} 
+				*/
 		} while(!exit);
 		return nameClient;
 	}
 	
 	///recorre la lista del array y imprime todas las reservas
-	public void showSeat() {
+	private void showSeat() {
 		System.out.println("The reservations at the Cinema are: ");
 		if (armChairManagement.getArmChairList().size() != 0) {
 			for (int index = 0; index < armChairManagement.getArmChairList().size(); index++) {
@@ -193,7 +206,7 @@ public class Cinema {
 	lo que tengo dudas es si neceisto un arrayList de clientes tambien, 
 	porque claro es el indice de uno con el nombre, y si tiene varios reservas por la misma persona
 	necesitaria un array de asientos asociados a una persona, o pensar como devolver varios indices */
-	public void showPersonSeat(String name) {
+	private void showPersonSeat(String name) {
 		int nameIndex = searchCustomerName(name);
 		if (nameIndex != -1) {
 			for (int index = 0; index < armChairManagement.getArmChairList().size(); index++) {
@@ -209,18 +222,20 @@ public class Cinema {
 	///metodo para reservar mesas. utiliza 3 maneras de enter, y se utiliza para crear objeto Armchair, todo enlazado con excepciones
 	///puede ser que necesito un do while aqui para repetir los datos.
 	///enterperson no me daba error de "Unhandled exception type", pero los numeros si. he movido los catches hasta aqui.
-	public void reserveArmChair(int row, int seat, String name) {
+	private void reserveArmChair(int row, int seat, String name) throws OccupiedSeatException {
 		try {
 			armChairManagement.addArmChair(new ArmChair(enterRow(row), enterSeat(seat), enterPerson(name)));
 		} catch (IncorrectRowException ire){
 			System.out.println("IncorrectRowException in reserve");
 		} catch (IncorrectSeatException ise) {
 			System.out.println("IncorrectSeatException in reserve");
-		}
+		} catch (IncorrectPersonNameException ipne) {
+			System.out.println("IncorrectPersonNameException in reserve");
+		} 
 	}
 	
 	//busca el array de los asientos y luego lo borra, si no lo encuentra da el excepcion asiento libre. 
-	public void cancelSeatReservation(int row, int seat) {
+	private void cancelSeatReservation(int row, int seat) {
 		try {
 			armChairManagement.deleteArmChair(enterRow(row), enterSeat(seat));
 		} catch (IncorrectRowException ire){
@@ -234,7 +249,7 @@ public class Cinema {
 	
 	///busca en el arraylist al nombre del cliente, lo guarda el indice y coje el nombre, 
 	//vuelve a recorrer la lista desde atras por si repite el nombre y los borra de la lista, pero no afectando al size del arraylist 
-	public void cancelPersonReservation(String name) {
+	private void cancelPersonReservation(String name) {
 		int nameIndex = searchCustomerName(enterPerson(name));
 		if (nameIndex != -1) {
 			String nameClient = armChairManagement.getArmChairList().get(nameIndex).getNameCustomer();
@@ -249,7 +264,7 @@ public class Cinema {
 		System.out.println("The reservations for the customer have been cancelled.");
 	}
 	
-	public int searchCustomerName(String name) {		////buscar el nombre de un cliente
+	private int searchCustomerName(String name) {		////buscar el nombre de un cliente
 		int counter = 0;
 		int index = -1;
 		if (armChairManagement.getArmChairList().size() != 0) {//me daba error si estaba vacio la lista, esto sirve como control si esta vacio
